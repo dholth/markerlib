@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Interpret PEP 345 environment markers.
 
 EXPR [in|==|!=|not in] EXPR [or|and] ...
@@ -14,12 +15,19 @@ where EXPR belongs to any of those:
     a free string, like '2.4', or 'win32'
 """
 
-import ast
+__all__ = ['default_environment', 'as_function', 'interpret']
+
+# Would import from ast but for Python 2.5
+from _ast import Compare, BoolOp, Attribute, Name, Load, Str, cmpop, boolop
+try:
+    from ast import parse, copy_location, NodeTransformer
+except ImportError: # pragma no coverage
+    from markerlib._markers_ast import parse, copy_location, NodeTransformer
+
 import os
 import platform
 import sys
 
-from ast import NodeTransformer
 from platform import python_implementation
 
 # restricted set of variables
@@ -43,25 +51,23 @@ class ASTWhitelist(NodeTransformer):
     def __init__(self, statement):
         self.statement = statement # for error messages
     
-    ALLOWED = (ast.Compare, ast.BoolOp, ast.Attribute, ast.Name, ast.Load,
-        ast.Str, ast.cmpop, ast.boolop)
+    ALLOWED = (Compare, BoolOp, Attribute, Name, Load, Str, cmpop, boolop)
     
     def visit(self, node):
         """Ensure statement only contains allowed nodes."""
         if not isinstance(node, self.ALLOWED):
-            raise SyntaxError('%s not allowed\n%s\n%s' %
-                              (node.__class__, 
-                               self.statement, 
+            raise SyntaxError('Not allowed in environment markers.\n%s\n%s' %
+                               (self.statement, 
                                (' ' * node.col_offset) + '^'))
         return NodeTransformer.visit(self, node)
     
     def visit_Attribute(self, node):
         """Flatten one level of attribute access."""
-        new_node = ast.Name("%s.%s" % (node.value.id, node.attr), node.ctx)
-        return ast.copy_location(new_node, node)
+        new_node = Name("%s.%s" % (node.value.id, node.attr), node.ctx)
+        return copy_location(new_node, node)
 
 def parse_marker(marker):
-    tree = ast.parse(marker, mode='eval')
+    tree = parse(marker, mode='eval')
     new_tree = ASTWhitelist(marker).generic_visit(tree)
     return new_tree
 
