@@ -7,7 +7,7 @@ Compile or interpret PEP 345 environment markers.
 Usage::
 
     >>> import markerlib
-    >>> marker = markerlib.as_function("os.name == 'posix'")
+    >>> marker = markerlib.compile("os.name == 'posix'")
     >>> marker(environment=markerlib.default_environment(),
                override={'os.name':'posix'})
     True

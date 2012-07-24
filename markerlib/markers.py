@@ -15,7 +15,7 @@ where EXPR belongs to any of those:
     a free string, like '2.4', or 'win32'
 """
 
-__all__ = ['default_environment', 'as_function', 'interpret']
+__all__ = ['default_environment', 'compile', 'interpret']
 
 # Would import from ast but for Python 2.5
 from _ast import Compare, BoolOp, Attribute, Name, Load, Str, cmpop, boolop
@@ -27,6 +27,9 @@ except ImportError: # pragma no coverage
 import os
 import platform
 import sys
+import weakref
+
+_builtin_compile = compile
 
 from platform import python_implementation
 
@@ -72,27 +75,36 @@ def parse_marker(marker):
     return new_tree
 
 def compile_marker(parsed_marker):
-    return compile(parsed_marker, '<environment marker>', 'eval',
+    return _builtin_compile(parsed_marker, '<environment marker>', 'eval',
                    dont_inherit=True)
 
-def as_function(marker):
+_cache = weakref.WeakValueDictionary()
+
+def compile(marker):
     """Return compiled marker as a function accepting an environment dict."""
+    try:
+        return _cache[marker]
+    except KeyError:
+        pass
     if not marker.strip():
-        def dummy_marker(environment=None, override=None):
+        def marker_fn(environment=None, override=None):
             """"""
             return True
-        return dummy_marker        
-    compiled_marker = compile_marker(parse_marker(marker))
-    def marker_fn(environment=None, override=None):
-        """Extra updates environment"""
-        if override is None:
-            override = {}
-        if environment is None:
-            environment = default_environment()
-        environment.update(override)
-        return eval(compiled_marker, environment)
+    else:
+        compiled_marker = compile_marker(parse_marker(marker))
+        def marker_fn(environment=None, override=None):
+            """override updates environment"""
+            if override is None:
+                override = {}
+            if environment is None:
+                environment = default_environment()
+            environment.update(override)
+            return eval(compiled_marker, environment)
     marker_fn.__doc__ = marker
-    return marker_fn
+    _cache[marker] = marker_fn
+    return _cache[marker]
+
+as_function = compile # bw compat
 
 def interpret(marker, environment=None):
-    return as_function(marker)(environment)
+    return compile(marker)(environment)

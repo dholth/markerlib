@@ -1,3 +1,8 @@
+0.4
+===
+- Cache compiled marker functions with weakref.WeakValueDictionary
+- Rename markerlib.as_function to markerlib.compile
+
 0.3
 ===
 - Might work on Python 2.5 (includes needed parts of the ast module from

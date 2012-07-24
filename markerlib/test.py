@@ -3,7 +3,7 @@ import os
 from nose.tools import assert_true, assert_false, assert_equal, raises
        
 def test_markers():
-    from .markers import interpret, default_environment, as_function
+    from .markers import interpret, default_environment, compile
     
     os_name = os.name
     
@@ -43,7 +43,7 @@ def test_markers():
     raises_syntaxError()
     
     statement = "python_version == '5'"
-    assert_equal(as_function(statement).__doc__, statement)
+    assert_equal(compile(statement).__doc__, statement)
     
 def test_ast():
     try:
