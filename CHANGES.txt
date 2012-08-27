@@ -1,3 +1,7 @@
+0.5.1
+=====
+- Include 'empty marker' heuristic in markerlib itself
+
 0.5
 ===
 - One final release until it's just a part of distribute
