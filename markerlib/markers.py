@@ -21,7 +21,7 @@ __all__ = ['default_environment', 'compile', 'interpret']
 from _ast import Compare, BoolOp, Attribute, Name, Load, Str, cmpop, boolop
 try:
     from ast import parse, copy_location, NodeTransformer
-except ImportError: # pragma no coverage
+except ImportError: # pragma: no cover
     from markerlib._markers_ast import parse, copy_location, NodeTransformer
 
 import os
@@ -31,7 +31,11 @@ import weakref
 
 _builtin_compile = compile
 
-from platform import python_implementation
+try: # since Python 2.6
+    from platform import python_implementation
+except: # pragma: no cover
+    def python_implementation():
+        return None
 
 # restricted set of variables
 _VARS = {'sys.platform': sys.platform,
