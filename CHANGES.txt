@@ -1,3 +1,7 @@
+0.5
+===
+- One final release until it's just a part of distribute
+
 0.4
 ===
 - Cache compiled marker functions with weakref.WeakValueDictionary
