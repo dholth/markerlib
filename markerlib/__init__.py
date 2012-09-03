@@ -14,3 +14,6 @@ except ImportError:
         return marker_fn
     def interpret(marker, environment=None, override=None):
         return compile(marker)()
+
+# bw compat
+as_function = compile
