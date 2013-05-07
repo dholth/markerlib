@@ -13,6 +13,9 @@ where EXPR belongs to any of those:
     platform.machine = platform.machine()
     platform.python_implementation = platform.python_implementation()
     a free string, like '2.6', or 'win32'
+
+
+Lately we're going to replace . with _ for consistency.
 """
 
 __all__ = ['default_environment', 'compile', 'interpret']
@@ -41,6 +44,10 @@ _VARS = {'sys.platform': sys.platform,
          'platform.python_implementation': python_implementation(),
          'extra': None # wheel extension
         }
+
+for var in list(_VARS.keys()):
+    if '.' in var:
+        _VARS[var.replace('.', '_')] = _VARS[var]
 
 def default_environment():
     """Return copy of default PEP 385 globals dictionary."""

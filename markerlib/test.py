@@ -15,15 +15,19 @@ def test_markers():
     assert_true(interpret("python_version <= '5.0'"))
     assert_true(interpret("python_version >= '1.0'"))
     assert_true(interpret("'%s' in os.name" % os_name))
+    assert_true(interpret("'%s' in os_name" % os_name))
     assert_true(interpret("'buuuu' not in os.name"))
     
     assert_false(interpret("os.name == 'buuuu'"))
+    assert_false(interpret("os_name == 'buuuu'"))
     assert_false(interpret("python_version < '1.0'"))
     assert_false(interpret("python_version > '5.0'"))
     assert_false(interpret("python_version >= '5.0'"))
     assert_false(interpret("python_version <= '1.0'"))
     assert_false(interpret("'%s' not in os.name" % os_name))
+    assert_false(interpret("'%s' not in os_name" % os_name))
     assert_false(interpret("'buuuu' in os.name and python_version >= '5.0'"))    
+    assert_false(interpret("'buuuu' in os_name and python_version >= '5.0'"))    
     
     environment = default_environment()
     environment['extra'] = 'test'
